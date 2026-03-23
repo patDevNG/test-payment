@@ -1,8 +1,8 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { login } from '../auth.service';
-import { AppError } from '../../../http/middleware/errorHandler';
 import { db } from '../../../db';
+import { AppError } from '../../../http/middleware/errorHandler';
+import { login } from '../auth.service';
 
 jest.mock('../../../db', () => ({
   db: { select: jest.fn() },
@@ -70,8 +70,8 @@ describe('login', () => {
 
   it('throws 403 when user has no company membership', async () => {
     (db.select as jest.Mock)
-      .mockReturnValueOnce(q([userRow]))  // users query
-      .mockReturnValueOnce(q([]));         // companyMembers query — no membership
+      .mockReturnValueOnce(q([userRow])) // users query
+      .mockReturnValueOnce(q([])); // companyMembers query — no membership
     (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
     await expect(login('jane@example.com', 'correct')).rejects.toMatchObject({
@@ -81,9 +81,7 @@ describe('login', () => {
   });
 
   it('returns accessToken and expiresIn on successful login', async () => {
-    (db.select as jest.Mock)
-      .mockReturnValueOnce(q([userRow]))
-      .mockReturnValueOnce(q([memberRow]));
+    (db.select as jest.Mock).mockReturnValueOnce(q([userRow])).mockReturnValueOnce(q([memberRow]));
     (bcrypt.compare as jest.Mock).mockResolvedValue(true);
     (jwt.sign as jest.Mock).mockReturnValue('signed.jwt.token');
 

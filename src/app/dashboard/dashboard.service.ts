@@ -1,5 +1,5 @@
 import Decimal from 'decimal.js';
-import { and, count, desc, eq, inArray } from 'drizzle-orm';
+import { and, desc, eq, inArray, sql } from 'drizzle-orm';
 import type { Context } from '../../ctx';
 import { db } from '../../db';
 import { cards, companies, invoices, transactions } from '../../db/schema';
@@ -8,26 +8,55 @@ import type { DashboardResponse } from '../../http/resources/dashboard/spec';
 import { getLogger } from '../../logger';
 
 export const getDashboard = async (ctx: Context): Promise<DashboardResponse['data']> => {
-  const [companyRows, cardRows, recentTxRows, [{ total }], pendingInvoiceRows] = await Promise.all([
-    db.select().from(companies).where(eq(companies.id, ctx.companyId)).limit(1),
+  const [companyRows, cardRows, recentTxRows, txCountResult, pendingInvoiceRows] =
+    await Promise.all([
+    db.select({ id: companies.id, name: companies.name })
+      .from(companies)
+      .where(eq(companies.id, ctx.companyId))
+      .limit(1),
     db
-      .select()
+      .select({
+        id: cards.id,
+        lastFour: cards.lastFour,
+        cardHolder: cards.cardHolder,
+        network: cards.network,
+        status: cards.status,
+        spendLimit: cards.spendLimit,
+        spentThisMonth: cards.spentThisMonth,
+        currency: cards.currency,
+      })
       .from(cards)
       .where(eq(cards.companyId, ctx.companyId))
       .orderBy(cards.createdAt)
       .limit(1),
     db
-      .select()
+      .select({
+        id: transactions.id,
+        cardId: transactions.cardId,
+        amount: transactions.amount,
+        currency: transactions.currency,
+        merchantName: transactions.merchantName,
+        merchantCategory: transactions.merchantCategory,
+        description: transactions.description,
+        status: transactions.status,
+        transactedAt: transactions.transactedAt,
+      })
       .from(transactions)
       .where(eq(transactions.companyId, ctx.companyId))
       .orderBy(desc(transactions.transactedAt))
       .limit(5),
+    // Capped at 1001 to avoid full-table scans; UI should show "1000+" beyond that
+    db.execute<{ total: string }>(
+      sql`SELECT count(*) AS total FROM (SELECT 1 FROM transactions WHERE company_id = ${ctx.companyId} LIMIT 1001) sub`,
+    ),
     db
-      .select({ total: count() })
-      .from(transactions)
-      .where(eq(transactions.companyId, ctx.companyId)),
-    db
-      .select()
+      .select({
+        id: invoices.id,
+        amount: invoices.amount,
+        currency: invoices.currency,
+        dueDate: invoices.dueDate,
+        status: invoices.status,
+      })
       .from(invoices)
       .where(
         and(
@@ -45,6 +74,7 @@ export const getDashboard = async (ctx: Context): Promise<DashboardResponse['dat
 
   // card row already has spentThisMonth and spendLimit — no extra query needed
   const invoice = pendingInvoiceRows[0] ?? null;
+  const total = Math.min(Number(txCountResult.rows[0]?.total ?? 0), 1000);
 
   const result = {
     company: { id: company.id, name: company.name },
@@ -57,9 +87,8 @@ export const getDashboard = async (ctx: Context): Promise<DashboardResponse['dat
     },
     spend: {
       cardId: card.id,
-      spendLimit: new Decimal(card.spendLimit).toFixed(2),
+      monthlyLimit: new Decimal(card.spendLimit).toFixed(2),
       spentThisMonth: new Decimal(card.spentThisMonth).toFixed(2),
-      remaining: new Decimal(card.spendLimit).minus(card.spentThisMonth).toFixed(2),
       currency: card.currency,
     },
     invoice: invoice

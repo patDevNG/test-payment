@@ -7,7 +7,7 @@ export const Card = z.object({
   cardHolder: z.string(),
   network: z.enum(['Mastercard', 'Visa']),
   status: z.enum(['active', 'inactive', 'blocked']),
-  spendLimit: z.string(),
+  monthlyLimit: z.string(),
   currency: z.string().length(3),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
@@ -15,9 +15,8 @@ export const Card = z.object({
 
 export const SpendSummary = z.object({
   cardId: z.uuid(),
-  spendLimit: z.string(),
+  monthlyLimit: z.string(),
   spentThisMonth: z.string(),
-  remaining: z.string(),
   currency: z.string().length(3),
 });
 

@@ -1,6 +1,6 @@
-import { getDashboard } from '../dashboard.service';
-import { db } from '../../../db';
 import type { Context } from '../../../ctx';
+import { db } from '../../../db';
+import { getDashboard } from '../dashboard.service';
 
 jest.mock('../../../db', () => ({
   db: { select: jest.fn() },
@@ -61,13 +61,15 @@ const invoiceRow = {
 
 // Configures db.select to return the 5 dashboard queries in order:
 // companies → cards → recent transactions → transaction count → pending invoices
-const setupDashboardQueries = (overrides: {
-  company?: any[];
-  card?: any[];
-  transactions?: any[];
-  total?: number;
-  invoice?: any[];
-} = {}) => {
+const setupDashboardQueries = (
+  overrides: {
+    company?: any[];
+    card?: any[];
+    transactions?: any[];
+    total?: number;
+    invoice?: any[];
+  } = {},
+) => {
   (db.select as jest.Mock)
     .mockReturnValueOnce(q(overrides.company ?? [companyRow]))
     .mockReturnValueOnce(q(overrides.card ?? [cardRow]))
@@ -104,9 +106,8 @@ describe('getDashboard', () => {
     expect(result.card).toMatchObject({ id: 'card-1', lastFour: '4242', network: 'Visa' });
     expect(result.spend).toEqual({
       cardId: 'card-1',
-      spendLimit: '10000.00',
+      monthlyLimit: '10000.00',
       spentThisMonth: '3000.00',
-      remaining: '7000.00',
       currency: 'SEK',
     });
     expect(result.invoice).toMatchObject({ id: 'inv-1', status: 'pending' });
@@ -131,13 +132,14 @@ describe('getDashboard', () => {
     expect(result.recentTransactions[0].transactedAt).toBe('2026-03-01T12:00:00.000Z');
   });
 
-  it('computes spend remaining correctly', async () => {
+  it('reflects the card monthly limit in spend summary', async () => {
     setupDashboardQueries({
       card: [{ ...cardRow, spendLimit: '5000.00', spentThisMonth: '4999.99' }],
     });
 
     const result = await getDashboard(ctx);
 
-    expect(result.spend.remaining).toBe('0.01');
+    expect(result.spend.monthlyLimit).toBe('5000.00');
+    expect(result.spend.spentThisMonth).toBe('4999.99');
   });
 });

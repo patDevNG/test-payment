@@ -61,7 +61,6 @@ export const listTransactions = async (
         .where(and(...pageFilters))
         .orderBy(desc(transactions.transactedAt), desc(transactions.id))
         .limit(opts.limit),
-      // Total count spans all matching rows ignoring cursor position
       tx
         .select({ total: count() })
         .from(transactions)

@@ -59,6 +59,7 @@ export const cards = pgTable(
     cardHolder: text('card_holder').notNull(),
     network: text('network').notNull(),
     status: text('status').notNull().default('inactive'),
+    externalCardId: text('external_card_id').unique(),
     spendLimit: numeric('spend_limit', { precision: 12, scale: 2 }).notNull(),
     currency: varchar('currency', { length: 3 }).notNull().default('SEK'),
     spentThisMonth: numeric('spent_this_month', { precision: 12, scale: 2 }).notNull().default('0'),
@@ -67,7 +68,7 @@ export const cards = pgTable(
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
-    index('idx_cards_company').on(t.companyId),
+    index('idx_cards_company_created').on(t.companyId, t.createdAt),
     check('cards_network_check', sql`${t.network} IN ('Mastercard', 'Visa')`),
     check('cards_status_check', sql`${t.status} IN ('active', 'inactive', 'blocked')`),
   ],
@@ -85,6 +86,7 @@ export const transactions = pgTable(
       .references(() => companies.id),
     amount: numeric('amount', { precision: 12, scale: 2 }).notNull(),
     currency: varchar('currency', { length: 3 }).notNull().default('SEK'),
+    externalId: text('external_id').unique(), // authorization ID from the card network
     merchantName: text('merchant_name').notNull(),
     merchantCategory: text('merchant_category'),
     description: text('description'),
@@ -117,7 +119,7 @@ export const invoices = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
-    index('idx_invoices_company').on(t.companyId),
+    index('idx_invoices_company_status_due').on(t.companyId, t.status, t.dueDate),
     check('invoices_status_check', sql`${t.status} IN ('pending', 'paid', 'overdue')`),
   ],
 );

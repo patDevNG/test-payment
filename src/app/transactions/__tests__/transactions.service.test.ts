@@ -1,13 +1,11 @@
-import { encodeCursor, getTransaction, listTransactions } from '../transactions.service';
-import { db } from '../../../db';
 import type { Context } from '../../../ctx';
+import { db } from '../../../db';
+import { encodeCursor, getTransaction, listTransactions } from '../transactions.service';
 
 const setupListQuery = (rows: any[], total: number) => {
   (db.transaction as jest.Mock).mockImplementation(async (fn: (tx: any) => any) => {
     const tx = { select: jest.fn() };
-    (tx.select as jest.Mock)
-      .mockReturnValueOnce(q(rows))
-      .mockReturnValueOnce(q([{ total }]));
+    (tx.select as jest.Mock).mockReturnValueOnce(q(rows)).mockReturnValueOnce(q([{ total }]));
     return fn(tx);
   });
 };

@@ -10,9 +10,8 @@ export const CardSummary = z.object({
 
 export const SpendSummary = z.object({
   cardId: z.uuid(),
-  spendLimit: z.string(),
+  monthlyLimit: z.string(),
   spentThisMonth: z.string(),
-  remaining: z.string(),
   currency: z.string().length(3),
 });
 

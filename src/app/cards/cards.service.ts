@@ -15,7 +15,7 @@ const toCard = (row: CardRow) => ({
   cardHolder: row.cardHolder,
   network: row.network as 'Mastercard' | 'Visa',
   status: row.status as 'active' | 'inactive' | 'blocked',
-  spendLimit: new Decimal(row.spendLimit).toFixed(2),
+  monthlyLimit: new Decimal(row.spendLimit).toFixed(2),
   currency: row.currency,
   createdAt: row.createdAt.toISOString(),
   updatedAt: row.updatedAt.toISOString(),
@@ -23,9 +23,8 @@ const toCard = (row: CardRow) => ({
 
 const toSpendSummary = (row: CardRow) => ({
   cardId: row.id,
-  spendLimit: new Decimal(row.spendLimit).toFixed(2),
+  monthlyLimit: new Decimal(row.spendLimit).toFixed(2),
   spentThisMonth: new Decimal(row.spentThisMonth).toFixed(2),
-  remaining: new Decimal(row.spendLimit).minus(row.spentThisMonth).toFixed(2),
   currency: row.currency,
 });
 

@@ -1,6 +1,6 @@
-import { activateCard, getCard, getSpendSummary, listCards } from '../cards.service';
-import { db } from '../../../db';
 import type { Context } from '../../../ctx';
+import { db } from '../../../db';
+import { activateCard, getCard, getSpendSummary, listCards } from '../cards.service';
 
 jest.mock('../../../db', () => ({
   db: { select: jest.fn(), insert: jest.fn(), update: jest.fn(), transaction: jest.fn() },
@@ -52,7 +52,7 @@ describe('listCards', () => {
     const [card] = await listCards(ctx);
 
     expect(card.id).toBe('card-1');
-    expect(card.spendLimit).toBe('5000.00');
+    expect(card.monthlyLimit).toBe('5000.00');
     expect(card.createdAt).toBe('2026-01-01T00:00:00.000Z');
     expect(card.updatedAt).toBe('2026-01-02T00:00:00.000Z');
   });
@@ -155,19 +155,8 @@ describe('getSpendSummary', () => {
     const summary = await getSpendSummary(ctx, 'card-1');
 
     expect(summary.cardId).toBe('card-1');
-    expect(summary.spendLimit).toBe('5000.00');
+    expect(summary.monthlyLimit).toBe('5000.00');
     expect(summary.spentThisMonth).toBe('1200.50');
-    expect(summary.remaining).toBe('3799.50');
     expect(summary.currency).toBe('SEK');
-  });
-
-  it('computes remaining as zero when fully spent', async () => {
-    (db.select as jest.Mock).mockReturnValue(
-      q([{ ...baseCard, spendLimit: '1000.00', spentThisMonth: '1000.00' }]),
-    );
-
-    const summary = await getSpendSummary(ctx, 'card-1');
-
-    expect(summary.remaining).toBe('0.00');
   });
 });
