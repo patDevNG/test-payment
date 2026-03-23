@@ -3,7 +3,7 @@ import { db } from '../../../db';
 import { getDashboard } from '../dashboard.service';
 
 jest.mock('../../../db', () => ({
-  db: { select: jest.fn() },
+  db: { select: jest.fn(), execute: jest.fn() },
 }));
 
 jest.mock('../../../logger', () => ({
@@ -72,8 +72,11 @@ const setupDashboardQueries = (
     .mockReturnValueOnce(q(overrides.company ?? [companyRow]))
     .mockReturnValueOnce(q(overrides.card ?? [cardRow]))
     .mockReturnValueOnce(q(overrides.transactions ?? [txRow]))
-    .mockReturnValueOnce(q([{ total: overrides.total ?? 1 }]))
     .mockReturnValueOnce(q(overrides.invoice ?? [invoiceRow]));
+
+  (db.execute as jest.Mock).mockResolvedValueOnce({
+    rows: [{ total: String(overrides.total ?? 1) }],
+  });
 };
 
 describe('getDashboard', () => {
