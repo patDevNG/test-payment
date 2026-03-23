@@ -10,7 +10,7 @@ jest.mock('../../../logger', () => ({
   getLogger: () => ({ debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() }),
 }));
 
-// Makes a chainable, awaitable query stub resolving to `result`.
+
 const q = (result: unknown) => {
   const chain: any = {};
   for (const m of ['from', 'where', 'orderBy', 'limit']) {
@@ -59,8 +59,6 @@ const invoiceRow = {
   status: 'pending',
 };
 
-// Configures db.select to return the 5 dashboard queries in order:
-// companies → cards → recent transactions → transaction count → pending invoices
 const setupDashboardQueries = (
   overrides: {
     company?: any[];

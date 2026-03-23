@@ -33,7 +33,6 @@ export const verifyWebhookSignature = (req: Request, _res: Response, next: NextF
     throw new AppError(400, 'BAD_REQUEST', 'Invalid webhook signature');
   }
 
-  // Replace raw Buffer with parsed JSON for downstream handlers
   req.body = JSON.parse(rawBody);
   next();
 };

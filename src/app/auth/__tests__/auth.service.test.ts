@@ -18,7 +18,6 @@ jest.mock('../../../config/env', () => ({
   env: { JWT_PRIVATE_KEY: 'test-private-key' },
 }));
 
-// Makes a chainable, awaitable query stub resolving to `result`.
 const q = (result: unknown) => {
   const chain: any = {};
   for (const m of ['from', 'where', 'limit']) {

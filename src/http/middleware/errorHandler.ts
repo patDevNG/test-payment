@@ -31,7 +31,6 @@ export function errors(err: unknown, _req: Request, res: Response, _next: NextFu
   }
 
   if (err instanceof AppError) {
-    // 4xx are expected operational errors — warn, not error
     const level = err.statusCode >= 500 ? 'error' : 'warn';
     log[level]({ code: err.code, statusCode: err.statusCode }, err.message);
     res.status(err.statusCode).json({
@@ -45,7 +44,6 @@ export function errors(err: unknown, _req: Request, res: Response, _next: NextFu
     return;
   }
 
-  // Unknown errors: log full stack for post-mortem debugging
   log.error({ err }, 'Unhandled error');
   res.status(500).json({
     success: false,

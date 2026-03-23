@@ -13,7 +13,7 @@ const RefundEvent = z.object({
     object: z.object({
       authorization_id: z.string(),
       refund_id: z.string(),
-      amount: z.number().int().positive(), // positive value representing the refunded amount
+      amount: z.number().int().positive(),
       currency: z.string(),
       refunded_at: z.number().int(),
     }),

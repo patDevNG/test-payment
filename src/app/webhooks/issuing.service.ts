@@ -5,7 +5,6 @@ import { db } from '../../db';
 import { cards, transactions } from '../../db/schema';
 import { getLogger } from '../../logger';
 
-// Amounts are in the smallest currency unit (öre for SEK, cents for EUR/USD)
 const CENTS_DIVISOR = new Decimal(100);
 
 const IssuingAuthorizationEvent = z.object({

@@ -22,7 +22,8 @@ export const validate = (validators: RequestValidators) => {
       if (validators.query) {
         location = 'query';
         const parsed = (await validators.query.parseAsync(req.query)) as Record<string, string>;
-        req.query = parsed;
+        // Express v5: req.query is a read-only getter, mutate in place instead
+        Object.assign(req.query, parsed);
       }
       if (validators.body) {
         location = 'body';

@@ -5,8 +5,8 @@ import { asyncContext } from '../../lib/async-context';
 import { AppError } from './errorHandler';
 
 interface JwtPayload {
-  sub: string; // userId
-  cid: string; // companyId
+  sub: string;
+  cid: string;
   iat: number;
   exp: number;
 }
@@ -27,8 +27,6 @@ export const requestContext = (req: Request, _res: Response, next: NextFunction)
 
     req.ctx = { userId: payload.sub, companyId: payload.cid };
 
-    // Enrich the running AsyncLocalStorage store so loggers automatically
-    // include userId + companyId on every line without parameter threading.
     const store = asyncContext.getStore();
     if (store) {
       store.userId = payload.sub;

@@ -1,1 +1,1 @@
-ALTER TABLE cards ADD COLUMN external_card_id TEXT UNIQUE;
+ALTER TABLE cards ADD COLUMN IF NOT EXISTS external_card_id TEXT UNIQUE;

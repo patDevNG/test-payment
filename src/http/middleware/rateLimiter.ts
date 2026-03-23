@@ -15,9 +15,8 @@ export const globalLimiter = rateLimit({
   },
 });
 
-// Tighter limit for auth endpoints to slow brute-force attempts
 export const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 15 * 60 * 1000,
   max: 20,
   standardHeaders: 'draft-7',
   legacyHeaders: false,

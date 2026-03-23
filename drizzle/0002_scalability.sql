@@ -38,7 +38,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trg_card_spend
+CREATE OR REPLACE TRIGGER trg_card_spend
   AFTER INSERT OR UPDATE OF status, amount OR DELETE
   ON transactions
   FOR EACH ROW EXECUTE FUNCTION update_card_spend();

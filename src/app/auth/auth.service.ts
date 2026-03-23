@@ -16,14 +16,12 @@ export interface AuthTokens {
 
 export const login = async (email: string, password: string): Promise<AuthTokens> => {
   const log = getLogger();
-  // Log email domain only — never log the full address to avoid PII in log storage
   const emailDomain = email.split('@')[1] ?? 'unknown';
   log.info({ emailDomain }, 'Login attempt');
 
   const userRows = await db.select().from(users).where(eq(users.email, email)).limit(1);
   const user = userRows[0];
 
-  // Run bcrypt even when user not found to prevent timing-based user enumeration
   const hash = user?.passwordHash ?? '$2b$10$invalidsaltinvalidsaltinv.u1u1u1u1u1u1u1u1u1u1u';
   const valid = await bcrypt.compare(password, hash);
 

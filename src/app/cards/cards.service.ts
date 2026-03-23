@@ -75,7 +75,6 @@ export const activateCard = async (
       return { id: card.id, status: 'active' as const, updatedAt: card.updatedAt.toISOString() };
     }
 
-    // Atomic update — WHERE includes status guard to prevent race
     const updated = await tx
       .update(cards)
       .set({ status: 'active', updatedAt: new Date() })

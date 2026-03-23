@@ -45,7 +45,6 @@ export const getDashboard = async (ctx: Context): Promise<DashboardResponse['dat
       .where(eq(transactions.companyId, ctx.companyId))
       .orderBy(desc(transactions.transactedAt))
       .limit(5),
-    // Capped at 1001 to avoid full-table scans; UI should show "1000+" beyond that
     db.execute<{ total: string }>(
       sql`SELECT count(*) AS total FROM (SELECT 1 FROM transactions WHERE company_id = ${ctx.companyId} LIMIT 1001) sub`,
     ),
@@ -72,7 +71,6 @@ export const getDashboard = async (ctx: Context): Promise<DashboardResponse['dat
   const card = cardRows[0];
   if (!company || !card) throw new AppError(404, 'NOT_FOUND', 'Company or card not found');
 
-  // card row already has spentThisMonth and spendLimit — no extra query needed
   const invoice = pendingInvoiceRows[0] ?? null;
   const total = Math.min(Number(txCountResult.rows[0]?.total ?? 0), 1000);
 

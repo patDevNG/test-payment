@@ -42,7 +42,6 @@ export const listInvoices = async (
     opts.status ? eq(invoices.status, opts.status) : undefined,
   ].filter(Boolean) as Parameters<typeof and>;
 
-  // Keyset cursor: rows before (older than) this point in (due_date DESC, id DESC) order
   const cursorFilter = cursor
     ? sql`(${invoices.dueDate}, ${invoices.id}) < (${cursor.date}::date, ${cursor.id}::uuid)`
     : undefined;
@@ -57,7 +56,6 @@ export const listInvoices = async (
         .where(and(...pageFilters))
         .orderBy(desc(invoices.dueDate), desc(invoices.id))
         .limit(opts.limit),
-      // Total count spans all matching rows ignoring cursor position
       tx
         .select({ total: count() })
         .from(invoices)
